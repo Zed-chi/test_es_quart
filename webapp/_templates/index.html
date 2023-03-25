@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Elastic Search</title>
+    </head>
+    <body>
+        <form action="/search" method="post">
+            <label for="text">Текст поиска:</label>
+            <input type="text" name="text" id="text">
+            <button type="submit">Искать</button>
+        </form>
+        <article>
+            {% if query %}
+                По запросу "{{ query }}" найдено :
+                {% for result in results %}
+                    <fieldset>
+                        {{ result }}
+                    </fieldset>
+                {% endfor %}
+            {% else %}
+                Пусто
+            {% endif %}
+        </article>
+    </body>
+</html>
