@@ -1,0 +1,13 @@
+version: "3.3"
+
+services:
+  es:
+    image: bitnami/elasticsearch:7.14.2
+    container_name: documents_es
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ../es/data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
