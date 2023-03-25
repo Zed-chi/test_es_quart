@@ -1,0 +1,6 @@
+quart
+quart-schema
+quart-openapi
+elasticsearch
+tortoise-orm
+environs
