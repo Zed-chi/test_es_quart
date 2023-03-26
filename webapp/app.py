@@ -34,7 +34,6 @@ async def search():
     form = await request.form
     query = form["text"]
     doc_ids = await get_doc_ids_by_query(query)
-    print(f"=== {doc_ids}")
     docs = await Document.filter(id__in=doc_ids).order_by("created_date")
     serialized_docs = serialize_docs(docs)
 
@@ -66,10 +65,13 @@ async def delete_document(doc_id):
         db_document.delete()
 
     es_doc = await es.search(
-        index="documents",
-        size=20,
+        index=app.config["ES_INDEX"],
+        size=1,
         body={"query": {"match": {"doc_id": doc_id}}},
     )
+    if es_doc["hits"]["hits"]:
+        _id = es_doc["hits"]["hits"]["_id"]
+        await es.delete(index=app.config["ES_INDEX"], id=_id)
 
     return redirect("/")
 
