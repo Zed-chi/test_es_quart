@@ -1,13 +1,48 @@
 version: "3.3"
 
 services:
-  es:
-    image: bitnami/elasticsearch:7.14.2
-    container_name: documents_es
+  elastic:
+    container_name: elastic
+    build:
+      context: .
+      dockerfile: ./dockerfiles/elastic
+    restart: always
     ports:
       - "9200:9200"
       - "9300:9300"
-    volumes:
-      - ../es/data:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./webapp
+      dockerfile: ./dockerfiles/webapp
+    command: uvicorn app:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./webapp:/usr/src/app
+    ports:
+      - 8000:80
+    environment:
+      - ENVIRONMENT=dev
+      - TESTING=0
+      - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web_dev # new
+      - DATABASE_TEST_URL=postgres://postgres:postgres@web-db:5432/web_test # new
+    depends_on: # new
+      - db
+      - elastic
+
+  db:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/postgres
+    container_name: postgres
+    restart: always
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
