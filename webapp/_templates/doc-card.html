@@ -1,0 +1,11 @@
+<div class="w3-card w3-margin-top" style="position: relative;">
+    <header class="w3-container w3-blue">
+        <h5>{{ result.date }}</h5>
+    </header>
+    <div class="w3-container">
+        <p>{{ result.text }}</p>
+    </div>
+    <form action="/delete/{{ result.id }}">
+        <button type="submit" style="position: absolute; top:0; right:0;">x</button>
+    </form>
+</div>
