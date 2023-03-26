@@ -1,13 +1,12 @@
 import logging
-import os
 
 from elasticsearch import AsyncElasticsearch
+from environs import Env
+from quart import Quart, redirect, render_template, request
+from tortoise import Tortoise
+
 from init_scripts import run_init_check
 from models import Document
-from quart import Quart, render_template, request, redirect, url_for
-from tortoise import Tortoise
-from tortoise.contrib.quart import register_tortoise
-from environs import Env
 
 env = Env()
 env.read_env()
@@ -70,7 +69,7 @@ async def delete_document(doc_id):
         body={"query": {"match": {"doc_id": doc_id}}},
     )
     if es_doc["hits"]["hits"]:
-        _id = es_doc["hits"]["hits"]["_id"]
+        _id = es_doc["hits"]["hits"][0]["_id"]
         await es.delete(index=app.config["ES_INDEX"], id=_id)
 
     return redirect("/")
@@ -99,9 +98,7 @@ async def app_start():
     es = AsyncElasticsearch(
         f"http://{app.config['ES_HOST']}:{app.config['ES_PORT']}"
     )
-    await Tortoise.init(
-        db_url="sqlite://./test.db", modules={"models": ["models"]}
-    )
+    await Tortoise.init(db_url=db_url, modules={"models": ["models"]})
     await Tortoise.generate_schemas()
     await run_init_check(Document, es, es_index=app.config["ES_INDEX"])
 
