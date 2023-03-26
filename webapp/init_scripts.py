@@ -39,7 +39,7 @@ async def check_es_docs(es, es_index, model):
     perc_delta_diff_perc = get_diff(db_docs_count, es_docs_count)
     if perc_delta_diff_perc > 50:
         logger.info(f"perc = {perc_delta_diff_perc}")
-        await populate_es_from_db(es, es_index)
+        await populate_es_from_db(es, es_index, model)
         es_docs_count = (await es.count(index=es_index))["count"]
         logger.info(es_docs_count)
 
@@ -66,7 +66,7 @@ async def populate_db_from_csv(model, csv_path):
         next(reader)
 
         for _id, (text, created_date, rubrics) in enumerate(reader):
-            logger.info("=> post data to db ", _id)
+            logger.info(f"=> post data to db {_id}")
             await model.create(
                 text=text,
                 rubrics=rubrics,
@@ -77,7 +77,7 @@ async def populate_db_from_csv(model, csv_path):
 async def populate_es_from_db(es, index_name, model):
     documents = await model.all()
     for _id, doc in enumerate(documents):
-        logger.info("=> populating es from db ", _id)
+        logger.info(f"=> populating es from db {_id}")
         await es.create(
             index=index_name,
             id=_id,
