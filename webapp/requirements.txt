@@ -4,3 +4,5 @@ quart-openapi
 elasticsearch
 tortoise-orm
 environs
+uvicorn
+aiohttp
