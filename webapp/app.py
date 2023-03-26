@@ -31,21 +31,32 @@ async def index():
 
 @app.post("/search")
 async def search():
-    text_results = None
-    q = None
-    if request.method == "POST":
-        form = await request.form
-        q = form["text"]
-        res = await es.search(
-            index="documents2", size=20, body={"query": {"match": {"text": q}}}
-        )
-        print(f'=== {res["hits"]["hits"][0]}')
-        text_results = [
-            {"text": i["_source"]["text"], "doc_id": i["_source"]["doc_id"]}
-            for i in res["hits"]["hits"]
-        ]
+    form = await request.form
+    query = form["text"]
+    doc_ids = await get_doc_ids_by_query(query)
+    print(f"=== {doc_ids}")
+    docs = await Document.filter(id__in=doc_ids).order_by("created_date")
+    serialized_docs = serialize_docs(docs)
 
-    return await render_template("index.html", query=q, results=text_results)
+    return await render_template(
+        "index.html", query=query, results=serialized_docs
+    )
+
+
+def serialize_docs(docs):
+    return [
+        {"id": doc.id, "text": doc.text, "date": doc.created_date}
+        for doc in docs
+    ]
+
+
+async def get_doc_ids_by_query(query):
+    res = await es.search(
+        index=app.config["ES_INDEX"],
+        size=20,
+        body={"query": {"match": {"text": query}}},
+    )
+    return [i["_source"]["doc_id"] for i in res["hits"]["hits"]]
 
 
 @app.post("/delete/<int:doc_id>")
@@ -90,7 +101,7 @@ async def app_start():
         db_url="sqlite://./test.db", modules={"models": ["models"]}
     )
     await Tortoise.generate_schemas()
-    await run_init_check(Document, es, es_index="documents2")
+    await run_init_check(Document, es, es_index=app.config["ES_INDEX"])
 
 
 if __name__ == "__main__":
