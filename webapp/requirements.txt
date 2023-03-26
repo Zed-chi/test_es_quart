@@ -6,3 +6,4 @@ tortoise-orm
 environs
 uvicorn
 aiohttp
+asyncpg
