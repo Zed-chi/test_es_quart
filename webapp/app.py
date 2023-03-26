@@ -84,16 +84,18 @@ async def app_shutdown():
 @app.before_serving
 async def app_start():
     global es
-    if app.config["SQLITE_PATH"]:
+    if app.config["DB"] == "SQLITE":
         db_url = f"sqlite://{app.config['SQLITE_PATH']}"
-    else:
-        db_url = "postgresql://{}:{}@{}:{}/{}".format(
+    elif app.config["DB"] == "PG":
+        db_url = "postgres://{}:{}@{}:{}/{}".format(
             app.config["PG_USERNAME"],
             app.config["PG_PASS"],
             app.config["PG_HOST"],
             app.config["PG_PORT"],
             app.config["PG_DB_NAME"],
         )
+    else:
+        raise ValueError("Please provide correct db type in ENV")
 
     es = AsyncElasticsearch(
         f"http://{app.config['ES_HOST']}:{app.config['ES_PORT']}"
