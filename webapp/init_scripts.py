@@ -3,10 +3,9 @@ import csv
 import logging
 from datetime import datetime
 
+from db.models import Document
 from elasticsearch import AsyncElasticsearch
 from tortoise import Tortoise
-
-from models import Document
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
