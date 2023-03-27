@@ -21,7 +21,7 @@ async def index():
 
 @blueprint.post("/search")
 @validate_request(SearchQuery, source=DataSource.FORM)
-async def search():
+async def search(data):
     """Search endpoint for browser
 
     Receives 'text' from the form, returns
