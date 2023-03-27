@@ -48,7 +48,7 @@ async def delete_document(doc_id):
     """
     db_document = await Document.get_or_none(id=doc_id)
     if db_document:
-        db_document.delete()
+        await db_document.delete()
 
     es_doc = await current_app.store["es"].search(
         index=current_app.config["ES_INDEX"],
