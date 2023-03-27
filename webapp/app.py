@@ -45,7 +45,7 @@ app = create_app()
 @app.after_serving
 async def app_shutdown():
     await Tortoise.close_connections()
-    await es.close()
+    await app.store["es"].close()
 
 
 @app.before_serving
