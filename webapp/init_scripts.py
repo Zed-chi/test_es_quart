@@ -16,13 +16,13 @@ async def check_db_empty(model, csv_path):
     db_docs_count = await model.all().count()
     if db_docs_count == 0:
         await populate_db_from_csv(model, csv_path)
-    logger.info(db_docs_count)
+    logger.debug(db_docs_count)
 
 
 async def check_es_index(es, es_index):
     """Checks if index exists and creates one"""
     index_exists = await es.indices.exists(index=es_index)
-    logger.info(index_exists)
+    logger.debug(index_exists)
 
     if not index_exists:
         await create_es_index(es, es_index)
@@ -31,16 +31,16 @@ async def check_es_index(es, es_index):
 async def check_es_docs(es, es_index, model):
     """Checks docs count and fills with data if empty"""
     es_docs_count = (await es.count(index=es_index))["count"]
-    logger.info(es_docs_count)
+    logger.debug(es_docs_count)
 
     db_docs_count = await model.all().count()
 
     perc_delta_diff_perc = get_diff(db_docs_count, es_docs_count)
     if perc_delta_diff_perc > 50:
-        logger.info(f"perc = {perc_delta_diff_perc}")
+        logger.debug(f"perc = {perc_delta_diff_perc}")
         await populate_es_from_db(es, es_index, model)
         es_docs_count = (await es.count(index=es_index))["count"]
-        logger.info(es_docs_count)
+        logger.debug(es_docs_count)
 
 
 async def run_init_check(
@@ -58,14 +58,14 @@ def get_diff(db_docs_count, es_docs_count):
 
 
 async def populate_db_from_csv(model, csv_path):
-    logger.info("=> populating db")
+    logger.debug("=> populating db")
     with open(csv_path, "r", encoding="utf-8") as file:
         reader = csv.reader(file)
         # Считывает заголовок
         next(reader)
 
         for _id, (text, created_date, rubrics) in enumerate(reader):
-            logger.info(f"=> post data to db {_id}")
+            logger.debug(f"=> post data to db {_id}")
             await model.create(
                 text=text,
                 rubrics=rubrics,
@@ -76,7 +76,7 @@ async def populate_db_from_csv(model, csv_path):
 async def populate_es_from_db(es, index_name, model):
     documents = await model.all()
     for _id, doc in enumerate(documents):
-        logger.info(f"=> populating es from db {_id}")
+        logger.debug(f"=> populating es from db {_id}")
         await es.create(
             index=index_name,
             id=_id,
@@ -91,7 +91,7 @@ async def create_es_index(
     es: AsyncElasticsearch,
     name: str,
 ):
-    logger.info("=> creating es ind")
+    logger.debug("=> creating es ind")
     mappings = {
         "properties": {
             "doc_id": {"type": "integer"},
