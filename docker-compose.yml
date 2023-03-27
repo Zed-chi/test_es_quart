@@ -24,6 +24,7 @@ services:
       - my_network
 
   web:
+    container_name: webapp
     env_file:
       - ./webapp/.env
     build:
