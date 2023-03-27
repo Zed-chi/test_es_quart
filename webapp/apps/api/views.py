@@ -36,31 +36,36 @@ blueprint = Blueprint("api", __name__)
 @validate_response(SearchAPIResult, 201)
 async def api_search():
     """API search documents endpoint"""
-    data = await request.get_json()
-    query = data["text"]
-    doc_ids = await get_doc_ids_by_query(query)
-    docs = await Document.filter(id__in=doc_ids).order_by("created_date")
-    serialized_docs = serialize_docs(docs)
+    try:
+        data = await request.get_json()
+        query = data["text"]
+        doc_ids = await get_doc_ids_by_query(query)
+        docs = await Document.filter(id__in=doc_ids).order_by("created_date")
+        serialized_docs = serialize_docs(docs)
 
-    return {"status": 201, "results": serialized_docs}
+        return {"status": 200, "results": serialized_docs}
+    except Exception as e:
+        return {"status": 500, "message": e}
 
 
 @blueprint.delete("/documents/<int:doc_id>")
 async def api_delete_document(doc_id):
     """API delete document endpoint"""
-    db_document = await Document.get_or_none(id=doc_id)
-    if db_document:
-        await db_document.delete()
+    try:
+        db_document = await Document.get_or_none(id=doc_id)
+        if db_document:
+            await db_document.delete()
 
-    es_doc = await current_app.store["es"].search(
-        index=current_app.config["ES_INDEX"],
-        size=1,
-        body={"query": {"match": {"doc_id": doc_id}}},
-    )
-    if es_doc["hits"]["hits"]:
-        _id = es_doc["hits"]["hits"][0]["_id"]
-        await current_app.store["es"].delete(
-            index=current_app.config["ES_INDEX"], id=_id
+        es_doc = await current_app.store["es"].search(
+            index=current_app.config["ES_INDEX"],
+            size=1,
+            body={"query": {"match": {"doc_id": doc_id}}},
         )
-
-    return {"status": 200, "message": "deleted"}
+        if es_doc["hits"]["hits"]:
+            _id = es_doc["hits"]["hits"][0]["_id"]
+            await current_app.store["es"].delete(
+                index=current_app.config["ES_INDEX"], id=_id
+            )
+        return {"status": 200, "message": "deleted"}
+    except Exception as e:
+        return {"status": 500, "message": e}

@@ -1,7 +1,14 @@
 from dataclasses import dataclass
 
 from db.models import Document
-from quart import Blueprint, current_app, redirect, render_template, request
+from quart import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+)
 from quart_schema import validate_request
 from quart_schema.validation import DataSource
 
@@ -29,13 +36,17 @@ async def search(data):
     """
     form = await request.form
     query = form["text"]
-    doc_ids = await get_doc_ids_by_query(query)
-    docs = await Document.filter(id__in=doc_ids).order_by("created_date")
-    serialized_docs = serialize_docs(docs)
-
-    return await render_template(
-        "index.html", query=query, results=serialized_docs
-    )
+    results = []
+    if query:
+        try:
+            doc_ids = await get_doc_ids_by_query(query)
+            docs = await Document.filter(id__in=doc_ids).order_by(
+                "created_date"
+            )
+            results = serialize_docs(docs)
+        except Exception as e:
+            flash(e)
+    return await render_template("index.html", query=query, results=results)
 
 
 @blueprint.post("/delete/<int:doc_id>")
@@ -46,21 +57,23 @@ async def delete_document(doc_id):
     deletes document from db, elastic index and
     returns to the home page.
     """
-    db_document = await Document.get_or_none(id=doc_id)
-    if db_document:
-        await db_document.delete()
+    try:
+        db_document = await Document.get_or_none(id=doc_id)
+        if db_document:
+            await db_document.delete()
 
-    es_doc = await current_app.store["es"].search(
-        index=current_app.config["ES_INDEX"],
-        size=1,
-        body={"query": {"match": {"doc_id": doc_id}}},
-    )
-    if es_doc["hits"]["hits"]:
-        _id = es_doc["hits"]["hits"][0]["_id"]
-        await current_app.store["es"].delete(
-            index=current_app.config["ES_INDEX"], id=_id
+        es_doc = await current_app.store["es"].search(
+            index=current_app.config["ES_INDEX"],
+            size=1,
+            body={"query": {"match": {"doc_id": doc_id}}},
         )
-
+        if es_doc["hits"]["hits"]:
+            _id = es_doc["hits"]["hits"][0]["_id"]
+            await current_app.store["es"].delete(
+                index=current_app.config["ES_INDEX"], id=_id
+            )
+    except Exception as e:
+        flash(e)
     return redirect("/")
 
 
@@ -77,9 +90,12 @@ def serialize_docs(docs):
 
 
 async def get_doc_ids_by_query(query):
-    res = await current_app.store["es"].search(
-        index=current_app.config["ES_INDEX"],
-        size=20,
-        body={"query": {"match": {"text": query}}},
-    )
-    return [i["_source"]["doc_id"] for i in res["hits"]["hits"]]
+    try:
+        res = await current_app.store["es"].search(
+            index=current_app.config["ES_INDEX"],
+            size=20,
+            body={"query": {"match": {"text": query}}},
+        )
+        return [i["_source"]["doc_id"] for i in res["hits"]["hits"]]
+    except:
+        return []
