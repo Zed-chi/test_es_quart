@@ -75,7 +75,9 @@ async def app_start():
 
     if app.config["INIT_CONTENT_CHECK"] == "True":
         app.logger.debug("=== Init Content Check")
-        await run_init_check(Document, es, es_index=app.config["ES_INDEX"])
+        await run_init_check(
+            Document, es=app.store["es"], es_index=app.config["ES_INDEX"]
+        )
 
 
 if __name__ == "__main__":
