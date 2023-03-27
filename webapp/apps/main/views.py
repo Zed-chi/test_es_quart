@@ -83,7 +83,7 @@ def serialize_docs(docs):
             "id": doc.id,
             "text": doc.text,
             "date": doc.created_date,
-            "rubrics": doc.rubrics,
+            "rubrics": doc.rubrics[1:-1].split(","),
         }
         for doc in docs
     ]
