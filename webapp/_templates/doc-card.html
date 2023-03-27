@@ -6,9 +6,15 @@
         <p>{{ result.text }}</p>
     </div>
     <div class="w3-container">
-        <p>{{ result.rubrics }}</p>
+        {% for rubric in result.rubrics %}
+            <span class="w3-blue w3-padding w3-margin" style="display: inline-block;">{{ rubric }}</span>
+        {% endfor %}
     </div>
     <form action="/delete/{{ result.id }}" method="post">
-        <button type="submit" style="position: absolute; top:0; right:0;">x</button>
+        <button type="submit"
+                style="position: absolute;
+                       top:0;
+                       right:0"
+                class="w3-btn w3-red">x</button>
     </form>
 </div>
