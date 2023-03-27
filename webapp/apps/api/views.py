@@ -34,7 +34,7 @@ blueprint = Blueprint("api", __name__)
 @blueprint.post("/documents/search")
 @validate_request(SearchAPIQuery, source=DataSource.JSON)
 @validate_response(SearchAPIResult, 201)
-async def api_search():
+async def api_search(data):
     """API search documents endpoint"""
     try:
         data = await request.get_json()
