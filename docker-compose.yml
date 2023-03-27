@@ -31,7 +31,9 @@ services:
       context: .
       dockerfile: ./docker_files/webapp
     volumes:
-      - webapp:/usr/src/app
+      - ./webapp:/usr/src/app
+      - sqlite:/usr/src/app/sqlite
+
     command: uvicorn app:app --reload --host 0.0.0.0 --port 80
     ports:
       - 80:80
@@ -69,6 +71,6 @@ services:
     networks:
       - my_network
 volumes:
-  webapp:
+  sqlite:
 networks:
   my_network:
