@@ -27,7 +27,7 @@ APP_INIT_CONTENT_CHECK=True # Начальная проверка наполне
 
 ```
 
-2)Запустить `docker-compose up`
+2.Запустить `docker-compose up`
 
 Глянуть адрес:
 `docker network ls`
