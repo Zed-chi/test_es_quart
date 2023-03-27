@@ -5,7 +5,7 @@ services:
     container_name: elastic
     build:
       context: .
-      dockerfile: ./dockerfiles/elastic
+      dockerfile: ./docker_files/elastic
     restart: always
     ports:
       - "9200:9200"
@@ -24,7 +24,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./dockerfiles/webapp
+      dockerfile: ./docker_files/webapp
     volumes:
       - webapp:/usr/src/app
     command: uvicorn app:app --reload --host 0.0.0.0 --port 8000
@@ -39,7 +39,7 @@ services:
   db:
     build:
       context: .
-      dockerfile: ./dockerfiles/postgres
+      dockerfile: ./docker_files/postgres
     container_name: postgres
     restart: always
     user: postgres
