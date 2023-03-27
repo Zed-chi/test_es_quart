@@ -20,21 +20,27 @@ services:
       interval: 5s
       timeout: 10s
       retries: 20
+    networks:
+      - my_network
 
   web:
+    env_file:
+      - ./webapp/.env
     build:
       context: .
       dockerfile: ./docker_files/webapp
     volumes:
       - webapp:/usr/src/app
-    command: uvicorn app:app --reload --host 0.0.0.0 --port 8000
+    command: uvicorn app:app --reload --host 0.0.0.0 --port 80
     ports:
-      - 8000:8000
+      - 80:80
     depends_on:
       db:
         condition: service_healthy
       elastic:
         condition: service_healthy
+    networks:
+      - my_network
 
   db:
     build:
@@ -59,5 +65,9 @@ services:
       interval: 3s
       timeout: 5s
       retries: 10
+    networks:
+      - my_network
 volumes:
   webapp:
+networks:
+  my_network:
