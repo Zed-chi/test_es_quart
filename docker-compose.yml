@@ -17,16 +17,16 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl -s http://localhost:9200 >/dev/null || exit 1
-      interval: 2s
-      timeout: 5s
-      retries: 10
+      interval: 5s
+      timeout: 10s
+      retries: 20
 
   web:
     build:
       context: .
       dockerfile: ./dockerfiles/webapp
     volumes:
-      - ./webapp/:/usr/src/app
+      - webapp:/usr/src/app
     command: uvicorn app:app --reload --host 0.0.0.0 --port 8000
     ports:
       - 8000:8000
@@ -59,3 +59,5 @@ services:
       interval: 3s
       timeout: 5s
       retries: 10
+volumes:
+  webapp:
