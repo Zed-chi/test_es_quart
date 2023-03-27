@@ -12,13 +12,13 @@
 ```
 APP_DB=SQLITE               # SQLITE или PG на выбор
 APP_SQLITE_PATH=./test.db   # Желаемый путь (в случае выбора SQLITE варианта базы)
-APP_PG_USERNAME=postgres    # по дефолту (в случае выбора SQLITE варианта базы)
-APP_PG_PASS=postgres        # по дефолту (в случае выбора SQLITE варианта базы)
-APP_PG_HOST=db              #алиас на адрес контейнера с БД (в случае выбора SQLITE варианта базы)
-APP_PG_PORT=5432            # по дефолту (в случае выбора SQLITE варианта базы)
-APP_PG_DB_NAME=postgres     # по дефолту (в случае выбора SQLITE варианта базы)
-APP_ES_HOST=elastic
-APP_ES_PORT=9200
+APP_PG_USERNAME=postgres    # по дефолту (в случае выбора PG варианта базы)
+APP_PG_PASS=postgres        # по дефолту (в случае выбора PG варианта базы)
+APP_PG_HOST=db              #алиас на адрес контейнера с БД
+APP_PG_PORT=5432            # по дефолту (в случае выбора PG варианта базы)
+APP_PG_DB_NAME=postgres     # по дефолту (в случае выбора PG варианта базы)
+APP_ES_HOST=elastic         #алиас на адрес контейнера с ES
+APP_ES_PORT=9200            # по дефолту
 APP_ES_INDEX=               # Любое название индекса
 APP_CSV_PATH=./posts.csv    # Путь до csv файла с дампом (В целом так и оставить)
 APP_SECRET=<...>
@@ -28,3 +28,7 @@ APP_INIT_CONTENT_CHECK=True # Начальная проверка наполне
 ```
 
 2)Запустить `docker-compose up`
+
+# Документация
+
+Как смог описал, можно глянуть по адресу `/docs`
